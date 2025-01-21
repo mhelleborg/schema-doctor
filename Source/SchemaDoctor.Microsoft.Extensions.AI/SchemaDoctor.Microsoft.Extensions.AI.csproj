@@ -1,5 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+    <PropertyGroup>
+      <VersionSuffix>preview</VersionSuffix>
+    </PropertyGroup>
+    
     <ItemGroup>
       <ProjectReference Include="..\SchemaDoctor\SchemaDoctor.csproj" />
     </ItemGroup>

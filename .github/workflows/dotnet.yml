@@ -48,7 +48,7 @@ jobs:
 
       - name: Pack
         if: github.event_name == 'release'
-        run: dotnet pack ${{ env.SOLUTION_FILE }} /p:Version=${{ env.VERSION }} --configuration Release --no-build -o packages
+        run: dotnet pack ${{ env.SOLUTION_FILE }} /p:VersionPrefix=${{ env.VERSION }} --configuration Release --no-build -o packages
 
       - name: Upload packages
         if: github.event_name == 'release'
