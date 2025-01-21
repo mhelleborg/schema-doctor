@@ -1,12 +1,44 @@
 ﻿using System.ComponentModel;
 using FluentAssertions;
 
+// ReSharper disable UnusedAutoPropertyAccessor.Local
 // ReSharper disable ClassNeverInstantiated.Local
 
 namespace SchemaDoctor.Tests;
 
 public class SchemaDoctorTests
 {
+    [Theory]
+    [InlineData("true", true)]
+    [InlineData("true", "true")]
+    [InlineData("\"true\"", true)]
+    [InlineData("false", false)]
+    [InlineData("\"false\"", false)]
+    [InlineData("false", "false")]
+    [InlineData("1234", 1234)]
+    [InlineData("1234", "1234")]
+    [InlineData("\"1234\"", 1234)]
+    [InlineData("\"1234\"", 1234f)]
+    [InlineData("\"1234\"", 1234d)]
+    [InlineData("\"1234\"", new[]{"1234"})]
+    [InlineData("\"1234,5678\"", new[]{"1234", "5678"})]
+    [InlineData("[\"1234\",\"5678\"]", new[]{"1234", "5678"})]
+    [InlineData("\"1234,5678\"", new[]{1234, 5678})]
+    public void CanMapBuiltInTypes(string raw, object expected)
+    {
+        // get the method by reflection
+        var methodInfo = typeof(SchemaTherapist)
+            .GetMethod(nameof(SchemaTherapist.TryMapToSchema))
+            ?.MakeGenericMethod(expected.GetType());
+
+        var parameters = new object?[] { raw, null, null, null };
+        var success = (bool)methodInfo!.Invoke(null, parameters)!;
+
+        success.Should().BeTrue();
+        var output = parameters[1];
+        output.Should().BeEquivalentTo(expected);
+    }
+
     [Fact]
     public void WhenJsonHasStringForNumber()
     {
