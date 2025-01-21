@@ -7,7 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Source\SchemaDoctor\SchemaDoctor.csproj" />
+      <ProjectReference Include="..\SchemaDoctor\SchemaDoctor.csproj" />
     </ItemGroup>
 
     <ItemGroup>

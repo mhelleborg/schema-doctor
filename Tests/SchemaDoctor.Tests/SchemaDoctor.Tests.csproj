@@ -22,7 +22,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\SchemaDoctor.Microsoft.Extensions.AI\SchemaDoctor.Microsoft.Extensions.AI.csproj" />
+      <ProjectReference Include="..\..\Source\SchemaDoctor.Microsoft.Extensions.AI\SchemaDoctor.Microsoft.Extensions.AI.csproj" />
       <ProjectReference Include="..\..\Source\SchemaDoctor\SchemaDoctor.csproj" />
     </ItemGroup>
 

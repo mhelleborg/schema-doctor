@@ -2,7 +2,7 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SchemaDoctor", "Source\SchemaDoctor\SchemaDoctor.csproj", "{38256F48-758A-4C74-ACF4-84818CE95CB8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SchemaDoctor.Microsoft.Extensions.AI", "SchemaDoctor.Microsoft.Extensions.AI\SchemaDoctor.Microsoft.Extensions.AI.csproj", "{CCF0E12C-D79B-4E78-9636-4981EE656379}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SchemaDoctor.Microsoft.Extensions.AI", "Source\SchemaDoctor.Microsoft.Extensions.AI\SchemaDoctor.Microsoft.Extensions.AI.csproj", "{CCF0E12C-D79B-4E78-9636-4981EE656379}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SchemaDoctor.Tests", "Tests\SchemaDoctor.Tests\SchemaDoctor.Tests.csproj", "{69CC344E-A734-4B6E-A053-F53F2C97B98B}"
 EndProject
