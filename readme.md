@@ -55,7 +55,10 @@ var function = AIFunctionFactoryWithTherapy.CreateFunction(
     description: "An example function"
 );
 
-// Wrap a function with schema therapy
+// Wrap a function with hallucination therapy
+AIFunction function = ...
+var wrappedFunction = function.WithTherapy();
+
 public static AIFunction WithTherapy(this AIFunction function)
 
 // Use the completion extension to handle potential hallucinations
