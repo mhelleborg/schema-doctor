@@ -14,7 +14,8 @@ public class JsonExtractorTests
                   {
                       "name": "John",
                       "age": "31",
-                      "city": "Baltimore"
+                      "city": "Baltimore",
+                      "tags": ["guinea pig", "test subject"]
                   }
                   ```
 
@@ -36,7 +37,8 @@ public class JsonExtractorTests
                                          {
                                              "name": "John",
                                              "age": "31",
-                                             "city": "Baltimore"
+                                             "city": "Baltimore",
+                                             "tags": ["guinea pig", "test subject"]
                                          }
                                          """.ReplaceLineEndings("\n"));
     }
@@ -52,7 +54,8 @@ public class JsonExtractorTests
                     {
                       "name": "John",
                       "age": "30",
-                      "city": "New York"
+                      "city": "New York",
+                      "tags": []
                     }
                   ]
                   ```
@@ -76,10 +79,11 @@ public class JsonExtractorTests
                                            {
                                              "name": "John",
                                              "age": "30",
-                                             "city": "New York"
+                                             "city": "New York",
+                                             "tags": []
                                            }
                                          ]
                                          """.ReplaceLineEndings("\n"));
     }
-
+    
 }

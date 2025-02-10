@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Text.Json.Serialization;
 using FluentAssertions;
 
 // ReSharper disable UnusedAutoPropertyAccessor.Local
@@ -473,6 +474,159 @@ public class SchemaDoctorTests
         result.Tags.Should().Be("[\"developer\", {\"level\": \"senior\", \"years\": 10}]");
     }
 
+    [Fact]
+    public void WhenJsonHasSchemaAndMarkdownWithLanguageSpec()
+    {
+        var raw = """
+                  ```json
+                  {
+                    "$schema": "http://json-schema.org/draft-04/schema#",
+                    "type": "object",
+                    "properties": {
+                      "Name": "John",
+                      "age": "30",
+                      "city": "New York",
+                      "metadata": {
+                        "type": "object",
+                        "properties": {
+                          "timestamp": "2024-02-10"
+                        }
+                      }
+                    }
+                  }
+                  ```
+                  """;
+
+        var ok = SchemaTherapist.TryMapToSchema<Person>(raw, out var result);
+
+        ok.Should().BeTrue();
+        result.Should().NotBeNull();
+        result!.Name.Should().Be("John");
+        result.Age.Should().Be(30);
+        result.City.Should().Be("New York");
+    }
+    
+    [Fact]
+    public void WhenJsonHasEmptyArray()
+    {
+        var raw = """
+                  {
+                      "tags": []
+                  }
+                  """;
+
+        var ok = SchemaTherapist.TryMapToSchema<TagResult>(raw, out var result);
+
+        ok.Should().BeTrue();
+        result.Should().NotBeNull();
+        result!.Tags.Should().BeEmpty();
+    }
+    
+    [Fact]
+    public void WhenJsonHasArrayAsCsvStringWithWhitespace()
+    {
+        var raw = """
+                  {
+                      "tags": "tag1,tag2,tag3,tag4"
+                  }
+                  """;
+
+        var ok = SchemaTherapist.TryMapToSchema<TagResult>(raw, out var result);
+
+        ok.Should().BeTrue();
+        result.Should().NotBeNull();
+        result!.Tags.Should().BeEquivalentTo("tag1", "tag2", "tag3", "tag4");
+    }
+    
+    [Fact]
+    public void WhenNestedObjectHasTypeConversion()
+    {
+        var raw = """
+                  {
+                      "name": "John",
+                      "age": 30,
+                      "address": {
+                          "streetNumber": "123",
+                          "zipCode": 12345
+                      }
+                  }
+                  """;
+
+        var ok = SchemaTherapist.TryMapToSchema<PersonWithAddress>(raw, out var result);
+
+        ok.Should().BeTrue();
+        result.Should().NotBeNull();
+        result!.Address.StreetNumber.Should().Be(123);
+        result.Address.ZipCode.Should().Be("12345");
+    }
+
+    [Fact]
+    public void WhenTextContainsInvalidAndValidJson()
+    {
+        var raw = """
+                  Here's some invalid JSON first:
+                  { "name": "Invalid", age: missing-quotes }
+
+                  But here's the correct one:
+                  {
+                      "name": "John",
+                      "age": "30",
+                      "city": "New York"
+                  }
+                  """;
+
+        var ok = SchemaTherapist.TryMapToSchema<Person>(raw, out var result);
+
+        ok.Should().BeTrue();
+        result.Should().NotBeNull();
+        result!.Name.Should().Be("John");
+    }
+    
+    [Fact]
+    public void WhenJsonHasStringForEnum()
+    {
+        var raw = """
+                  {
+                      "name": "John",
+                      "age": 30,
+                      "status": "Active"
+                  }
+                  """;
+
+        var ok = SchemaTherapist.TryMapToSchema<PersonWithStatus>(raw, out var result);
+
+        ok.Should().BeTrue();
+        result.Should().NotBeNull();
+        result!.Status.Should().Be(UserStatus.Active);
+    }
+
+    private class PersonWithStatus
+    {
+        public required string Name { get; set; }
+        public required int Age { get; set; }
+        public required UserStatus Status { get; set; }
+    }
+
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    private enum UserStatus
+    {
+        Active,
+        Inactive
+    }
+    
+    private class PersonWithAddress
+    {
+        public required string Name { get; set; }
+        public required int Age { get; set; }
+        public required Address Address { get; set; }
+    }
+
+    private class Address
+    {
+        public required int StreetNumber { get; set; }
+        public required string ZipCode { get; set; }
+    }
+    
     private class PersonWithNestedJson
     {
         public required string Name { get; set; }
