@@ -35,14 +35,14 @@ public class MyResponse
 }
 
 // Try to map potentially malformed JSON to your schema
-if (SchemaTherapist.TryMapToSchema<MyResponse>(llmResponse, out var parsed, out var error))
+if (SchemaTherapist.TryMapToSchema<MyResponse>(llmResponse, out var parsed))
 {
     // Successfully mapped to schema
     Console.WriteLine($"Number: {parsed.Number}");
 }
 else
 {
-    Console.WriteLine($"Failed to parse: {error}");
+    Console.WriteLine($"Failed to parse response");
 }
 ```
 
@@ -65,7 +65,7 @@ var wrappedFunction = function.WithTherapy();
 public static AIFunction WithTherapy(this AIFunction function)
 
 // Use the completion extension to handle potential hallucinations
-if (completion.TryToGetResultWithTherapy(out var result, out var error))
+if (completion.TryToGetResultWithTherapy(out var result))
 {
     Console.WriteLine($"Got result: {result}");
 }
