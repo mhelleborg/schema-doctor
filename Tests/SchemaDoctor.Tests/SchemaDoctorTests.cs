@@ -21,10 +21,10 @@ public class SchemaDoctorTests
     [InlineData("\"1234\"", 1234)]
     [InlineData("\"1234\"", 1234f)]
     [InlineData("\"1234\"", 1234d)]
-    [InlineData("\"1234\"", new[]{"1234"})]
-    [InlineData("\"1234,5678\"", new[]{"1234", "5678"})]
-    [InlineData("[\"1234\",\"5678\"]", new[]{"1234", "5678"})]
-    [InlineData("\"1234,5678\"", new[]{1234, 5678})]
+    [InlineData("\"1234\"", new[] { "1234" })]
+    [InlineData("\"1234,5678\"", new[] { "1234", "5678" })]
+    [InlineData("[\"1234\",\"5678\"]", new[] { "1234", "5678" })]
+    [InlineData("\"1234,5678\"", new[] { 1234, 5678 })]
     public void CanMapBuiltInTypes(string raw, object expected)
     {
         // get the method by reflection
@@ -32,7 +32,7 @@ public class SchemaDoctorTests
             .GetMethod(nameof(SchemaTherapist.TryMapToSchema))
             ?.MakeGenericMethod(expected.GetType());
 
-        var parameters = new object?[] { raw, null, null};
+        var parameters = new object?[] { raw, null, null };
         var success = (bool)methodInfo!.Invoke(null, parameters)!;
 
         success.Should().BeTrue();
@@ -245,13 +245,13 @@ public class SchemaDoctorTests
         var raw = """
                   John? Sure I know John!
                   I can even respond in json ({}) for you, like you asked!
-                  
+
                   {
                       "name": "John",
                       "age": "30",
                       "city": "New York"
                   }
-                  
+
                   I think that's the right age at least
                   """;
 
@@ -263,34 +263,34 @@ public class SchemaDoctorTests
         result.Age.Should().Be(30);
         result.City.Should().Be("New York");
     }
-    
+
     [Fact]
     public void WhenResultExistsInReasoningBlock()
     {
         var raw = """
                   <think>
                   Ok, let's do this
-                  
+
                   I think I know someone like that
-                  
+
                   Might be
-                  
+
                   {
                       "name": "Jeb",
                       "age": "99",
                       "city": "Old York"
                   }
-                  
+
                   Or no, could it be John?
-                  
+
                   {
                       "name": "John",
                       "age": "99",
                       "city": "New York"
                   }
-                  
+
                   I think that age is wrong.
-                  
+
                   OK, i've got it
                   <think/>
                   {
@@ -308,7 +308,7 @@ public class SchemaDoctorTests
         result.Age.Should().Be(30);
         result.City.Should().Be("New York");
     }
-    
+
     [Fact]
     public void WhenJsonIsWrappedInTextResponseAndMarkdown()
     {
@@ -322,7 +322,7 @@ public class SchemaDoctorTests
                       "city": "New York"
                   }
                   ```
-                  
+
                   I think that's the right age at least. He might have aged since the last test.
                   """;
 
@@ -334,13 +334,13 @@ public class SchemaDoctorTests
         result.Age.Should().Be(30);
         result.City.Should().Be("New York");
     }
-    
+
     [Fact]
     public void WhenResponseIsNotJson()
     {
         var raw = """
                   John? Sure I know John!
-                  
+
                   30, from new york, right?
                   """;
 
@@ -442,16 +442,16 @@ public class SchemaDoctorTests
 
         ok.Should().BeTrue();
         result.Should().NotBeNull();
-        result!.Tags.Should().BeEquivalentTo(new[] 
-        { 
-            "escaped\"quote", 
-            "back\\slash", 
-            "éø", 
-            "tab\there", 
-            "new\nline" 
+        result!.Tags.Should().BeEquivalentTo(new[]
+        {
+            "escaped\"quote",
+            "back\\slash",
+            "éø",
+            "tab\there",
+            "new\nline"
         });
     }
-    
+
     [Fact]
     public void WhenJsonContainsEmbeddedJsonString()
     {
@@ -505,7 +505,7 @@ public class SchemaDoctorTests
         result.Age.Should().Be(30);
         result.City.Should().Be("New York");
     }
-    
+
     [Fact]
     public void WhenJsonHasSchemaAndMarkdownWithLanguageSpecWithArray()
     {
@@ -528,7 +528,7 @@ public class SchemaDoctorTests
         result!.Tags.Should().NotBeNull();
         result!.Tags.Should().BeEmpty();
     }
-    
+
     [Fact]
     public void WhenJsonHasSchemaAndMarkdownWithLanguageSpecWithPopulatedArray()
     {
@@ -551,7 +551,7 @@ public class SchemaDoctorTests
         result!.Tags.Should().NotBeNull();
         result!.Tags.Should().BeEquivalentTo("uno", "dos", "tres");
     }
-    
+
     [Fact]
     public void WhenJsonHasEmptyArray()
     {
@@ -567,7 +567,7 @@ public class SchemaDoctorTests
         result.Should().NotBeNull();
         result!.Tags.Should().BeEmpty();
     }
-    
+
     [Fact]
     public void WhenJsonHasArrayAsCsvStringWithWhitespace()
     {
@@ -583,7 +583,7 @@ public class SchemaDoctorTests
         result.Should().NotBeNull();
         result!.Tags.Should().BeEquivalentTo("tag1", "tag2", "tag3", "tag4");
     }
-    
+
     [Fact]
     public void WhenNestedObjectHasTypeConversion()
     {
@@ -627,12 +627,12 @@ public class SchemaDoctorTests
         result.Should().NotBeNull();
         result!.Name.Should().Be("John");
     }
-    
+
     [Fact]
     public void WhenTextContainsJsonCharacters()
     {
         var raw = """
-                  
+
                   This might mess with the parsing: {{}[
 
                   {
@@ -648,7 +648,7 @@ public class SchemaDoctorTests
         result.Should().NotBeNull();
         result!.Name.Should().Be("John");
     }
-    
+
     [Fact]
     public void WhenJsonHasStringForEnum()
     {
@@ -667,45 +667,76 @@ public class SchemaDoctorTests
         result!.Status.Should().Be(UserStatus.Active);
     }
 
-    [JsonConverter(typeof(JsonStringEnumConverter))]
-    public enum Severity
+    [Fact]
+    public void WhenJsonHasMultipleNestedJsonBlocks()
     {
-        Low,
-        Medium,
-        High,
-        Critical
-    }
+        var raw = """
+                  Here's an attempt:
+                  {
+                      "invalid": true
+                  }
 
-    [JsonConverter(typeof(JsonStringEnumConverter))]
-    public enum Effort
-    {
-        Small,
-        Medium,
-        Large,
-        ExtraLarge
-    }
-    
-    public record SecurityIssue
-    {
-        public required string Description { get; init; }
-        public required Severity Severity { get; init; }
+                  Let me correct that:
+                  {
+                      "name": "John",
+                      "age": "30",
+                      "city": "New York"
+                  }
 
-        [Description(
-            "Fill in the vulnerable code. If it is the entire type, use the type name. Otherwise, copy the vulnerable part.")]
-        public required string Code { get; init; }
+                  Or maybe:
+                  {
+                      "name": "Jane",
+                      "age": "25",
+                      "city": "Boston"
+                  }
+                  """;
 
-        [Description("Level of effort required to fix this issue.")]
-        public required Effort? LevelOfEffort { get; init; }
-    }
+        var ok = SchemaTherapist.TryMapToSchema<Person>(raw, out var result);
 
-    public record FileSummary
-    {
-        [Description("High level summary of the file")]
-        public required string ExecutiveSummary { get; init; }
-
-        public required SecurityIssue[] DetectedSecurityIssues { get; init; }
+        ok.Should().BeTrue();
+        result.Should().NotBeNull();
+        result!.Name.Should().Be("Jane", "The mapper extracts the last valid match");
+        result.Age.Should().Be(25);
+        result.City.Should().Be("Boston");
     }
     
+    [Fact]
+    public void WhenJsonHasMultipleNestedJsonBlocksAndTheLastOneIsInvalid()
+    {
+        var raw = """
+                  Here's an attempt:
+                  {
+                      "invalid": true
+                  }
+
+                  Let me correct that:
+                  [
+                    {
+                        "name": "John",
+                        "age": "30",
+                        "city": "New York"
+                    }
+                  ]
+
+                  Or maybe:
+                  {
+                      "name": "Jane",
+                      "city": "Boston"
+                  }
+                  """;
+
+        var ok = SchemaTherapist.TryMapToSchema<Person[]>(raw, out var result);
+
+        ok.Should().BeTrue();
+        result.Should().HaveCount(1);
+        result![0].Should().BeEquivalentTo(new Person
+        {
+            Name = "John",
+            Age = 30,
+            City = "New York"
+        });
+    }
+
     private class PersonWithStatus
     {
         public required string Name { get; set; }
@@ -719,7 +750,7 @@ public class SchemaDoctorTests
         Active,
         Inactive
     }
-    
+
     private class PersonWithAddress
     {
         public required string Name { get; set; }
@@ -732,7 +763,7 @@ public class SchemaDoctorTests
         public required int StreetNumber { get; set; }
         public required string ZipCode { get; set; }
     }
-    
+
     private class PersonWithNestedJson
     {
         public required string Name { get; set; }
@@ -740,7 +771,7 @@ public class SchemaDoctorTests
         public required string City { get; set; }
         public required string Tags { get; set; }
     }
-    
+
     class Person
     {
         public required string Name { get; set; }
