@@ -7,7 +7,7 @@
     <RepositoryUrl>https://github.com/magnehell/schema-doctor</RepositoryUrl>
     <PackageTags>ai;llm;schema;json</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-<!--    <PackageIcon>icon.png</PackageIcon>-->
+    <PackageIcon>logo.png</PackageIcon>
     <PackageReadmeFile>readme.md</PackageReadmeFile>
 
     <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
@@ -26,7 +26,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-<!--    <None Include="$(MSBuildThisFileDirectory)\..\icon.png" Pack="true" PackagePath="\" />-->
+    <None Include="$(MSBuildThisFileDirectory)\..\logo.png" Pack="true" PackagePath="\" />
     <None Include="$(MSBuildThisFileDirectory)\..\readme.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
