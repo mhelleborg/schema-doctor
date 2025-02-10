@@ -31,7 +31,7 @@ public class SchemaDoctorTests
             .GetMethod(nameof(SchemaTherapist.TryMapToSchema))
             ?.MakeGenericMethod(expected.GetType());
 
-        var parameters = new object?[] { raw, null, null, null };
+        var parameters = new object?[] { raw, null, null};
         var success = (bool)methodInfo!.Invoke(null, parameters)!;
 
         success.Should().BeTrue();
@@ -50,10 +50,9 @@ public class SchemaDoctorTests
                   }
                   """;
 
-        var ok = SchemaTherapist.TryMapToSchema<Person>(raw, out var result, out var error);
+        var ok = SchemaTherapist.TryMapToSchema<Person>(raw, out var result);
 
         ok.Should().BeTrue();
-        error.Should().BeNull();
         result.Should().NotBeNull();
         result!.Name.Should().Be("John");
         result.Age.Should().Be(30);
@@ -72,10 +71,9 @@ public class SchemaDoctorTests
                   }
                   """;
 
-        var ok = SchemaTherapist.TryMapToSchema<Person>(raw, out var result, out var error);
+        var ok = SchemaTherapist.TryMapToSchema<Person>(raw, out var result);
 
         ok.Should().BeTrue();
-        error.Should().BeNull();
         result.Should().NotBeNull();
         result!.Name.Should().Be("John");
         result.Age.Should().Be(30);
@@ -95,10 +93,9 @@ public class SchemaDoctorTests
                   }
                   """;
 
-        var ok = SchemaTherapist.TryMapToSchema<Person>(raw, out var result, out var error);
+        var ok = SchemaTherapist.TryMapToSchema<Person>(raw, out var result);
 
         ok.Should().BeTrue();
-        error.Should().BeNull();
         result.Should().NotBeNull();
         result!.Name.Should().Be("John");
         result.Age.Should().Be(30);
@@ -115,10 +112,9 @@ public class SchemaDoctorTests
                   }
                   """;
 
-        var ok = SchemaTherapist.TryMapToSchema<TagResult>(raw, out var result, out var error);
+        var ok = SchemaTherapist.TryMapToSchema<TagResult>(raw, out var result);
 
         ok.Should().BeTrue();
-        error.Should().BeNull();
         result.Should().NotBeNull();
         result!.Tags.Should().BeEquivalentTo("tag1", "tag2", "tag3");
     }
@@ -132,10 +128,9 @@ public class SchemaDoctorTests
                   }
                   """;
 
-        var ok = SchemaTherapist.TryMapToSchema<TagResult>(raw, out var result, out var error);
+        var ok = SchemaTherapist.TryMapToSchema<TagResult>(raw, out var result);
 
         ok.Should().BeTrue();
-        error.Should().BeNull();
         result.Should().NotBeNull();
         result!.Tags.Should().BeEquivalentTo("1", "2", "3");
     }
@@ -149,10 +144,9 @@ public class SchemaDoctorTests
                   }
                   """;
 
-        var ok = SchemaTherapist.TryMapToSchema<OptionalTagResult>(raw, out var result, out var error);
+        var ok = SchemaTherapist.TryMapToSchema<OptionalTagResult>(raw, out var result);
 
         ok.Should().BeTrue();
-        error.Should().BeNull();
         result.Should().NotBeNull();
         result!.Tags.Should().BeEquivalentTo("tag1", "tag2", "tag3");
     }
@@ -166,10 +160,9 @@ public class SchemaDoctorTests
                   }
                   """;
 
-        var ok = SchemaTherapist.TryMapToSchema<TagResult>(raw, out var result, out var error);
+        var ok = SchemaTherapist.TryMapToSchema<TagResult>(raw, out var result);
 
         ok.Should().BeTrue();
-        error.Should().BeNull();
         result.Should().NotBeNull();
         result!.Tags.Should().BeEquivalentTo("tag1", "tag2", "tag3");
     }
@@ -201,10 +194,9 @@ public class SchemaDoctorTests
                            }
                            """;
 
-        var ok = SchemaTherapist.TryMapToSchema<ExplanationOutput>(raw, out var result, out var error);
+        var ok = SchemaTherapist.TryMapToSchema<ExplanationOutput>(raw, out var result);
 
         ok.Should().BeTrue();
-        error.Should().BeNull();
         result.Should().BeEquivalentTo(new ExplanationOutput
         {
             NeutralExplanation =
@@ -234,10 +226,9 @@ public class SchemaDoctorTests
                            }
                            """;
 
-        var ok = SchemaTherapist.TryMapToSchema<ExplanationOutput>(raw, out var result, out var error);
+        var ok = SchemaTherapist.TryMapToSchema<ExplanationOutput>(raw, out var result);
 
         ok.Should().BeTrue();
-        error.Should().BeNull();
         result.Should().BeEquivalentTo(new ExplanationOutput
         {
             NeutralExplanation =
@@ -247,7 +238,249 @@ public class SchemaDoctorTests
         });
     }
 
+    [Fact]
+    public void WhenJsonIsWrappedInTextResponse()
+    {
+        var raw = """
+                  John? Sure I know John!
+                  I can even respond in json ({}) for you, like you asked!
+                  
+                  {
+                      "name": "John",
+                      "age": "30",
+                      "city": "New York"
+                  }
+                  
+                  I think that's the right age at least
+                  """;
 
+        var ok = SchemaTherapist.TryMapToSchema<Person>(raw, out var result);
+
+        ok.Should().BeTrue();
+        result.Should().NotBeNull();
+        result!.Name.Should().Be("John");
+        result.Age.Should().Be(30);
+        result.City.Should().Be("New York");
+    }
+    
+    [Fact]
+    public void WhenResultExistsInReasoningBlock()
+    {
+        var raw = """
+                  <think>
+                  Ok, let's do this
+                  
+                  I think I know someone like that
+                  
+                  Might be
+                  
+                  {
+                      "name": "Jeb",
+                      "age": "99",
+                      "city": "Old York"
+                  }
+                  
+                  Or no, could it be John?
+                  
+                  {
+                      "name": "John",
+                      "age": "99",
+                      "city": "New York"
+                  }
+                  
+                  I think that age is wrong.
+                  
+                  OK, i've got it
+                  <think/>
+                  {
+                      "name": "John",
+                      "age": "30",
+                      "city": "New York"
+                  }
+                  """;
+
+        var ok = SchemaTherapist.TryMapToSchema<Person>(raw, out var result);
+
+        ok.Should().BeTrue();
+        result.Should().NotBeNull();
+        result!.Name.Should().Be("John");
+        result.Age.Should().Be(30);
+        result.City.Should().Be("New York");
+    }
+    
+    [Fact]
+    public void WhenJsonIsWrappedInTextResponseAndMarkdown()
+    {
+        var raw = """
+                  John? Sure I know John!
+                  I can even respond in json ({}) and markdown for you, like you asked!
+                  ```
+                  {
+                      "name": "John",
+                      "age": "30",
+                      "city": "New York"
+                  }
+                  ```
+                  
+                  I think that's the right age at least. He might have aged since the last test.
+                  """;
+
+        var ok = SchemaTherapist.TryMapToSchema<Person>(raw, out var result);
+
+        ok.Should().BeTrue();
+        result.Should().NotBeNull();
+        result!.Name.Should().Be("John");
+        result.Age.Should().Be(30);
+        result.City.Should().Be("New York");
+    }
+    
+    [Fact]
+    public void WhenResponseIsNotJson()
+    {
+        var raw = """
+                  John? Sure I know John!
+                  
+                  30, from new york, right?
+                  """;
+
+        var ok = SchemaTherapist.TryMapToSchema<Person>(raw, out _);
+
+        ok.Should().BeFalse();
+    }
+
+    [Fact]
+    public void WhenJsonContainsEscapedQuotes()
+    {
+        var raw = """
+                  {
+                      "name": "John \"Johnny\" Doe",
+                      "age": "30",
+                      "city": "New \"Big Apple\" York"
+                  }
+                  """;
+
+        var ok = SchemaTherapist.TryMapToSchema<Person>(raw, out var result);
+
+        ok.Should().BeTrue();
+        result.Should().NotBeNull();
+        result!.Name.Should().Be("John \"Johnny\" Doe");
+        result.Age.Should().Be(30);
+        result.City.Should().Be("New \"Big Apple\" York");
+    }
+
+    [Fact]
+    public void WhenJsonContainsBackslashes()
+    {
+        var raw = """
+                  {
+                      "name": "C:\\Users\\John\\Documents",
+                      "age": "30",
+                      "city": "New\\York"
+                  }
+                  """;
+
+        var ok = SchemaTherapist.TryMapToSchema<Person>(raw, out var result);
+
+        ok.Should().BeTrue();
+        result.Should().NotBeNull();
+        result!.Name.Should().Be("C:\\Users\\John\\Documents");
+        result.Age.Should().Be(30);
+        result.City.Should().Be("New\\York");
+    }
+
+    [Fact]
+    public void WhenJsonContainsUnicodeEscapes()
+    {
+        var raw = """
+                  {
+                      "name": "J\u00f6hn D\u00f8e",
+                      "age": "30",
+                      "city": "N\u00e9w Y\u00f8rk"
+                  }
+                  """;
+
+        var ok = SchemaTherapist.TryMapToSchema<Person>(raw, out var result);
+
+        ok.Should().BeTrue();
+        result.Should().NotBeNull();
+        result!.Name.Should().Be("Jöhn Døe");
+        result.Age.Should().Be(30);
+        result.City.Should().Be("Néw Yørk");
+    }
+
+    [Fact]
+    public void WhenJsonContainsSpecialCharacters()
+    {
+        var raw = """
+                  {
+                      "name": "John\tDoe\nSmith",
+                      "age": "30",
+                      "city": "New\rYork\b"
+                  }
+                  """;
+
+        var ok = SchemaTherapist.TryMapToSchema<Person>(raw, out var result);
+
+        ok.Should().BeTrue();
+        result.Should().NotBeNull();
+        result!.Name.Should().Be("John\tDoe\nSmith");
+        result.Age.Should().Be(30);
+        result.City.Should().Be("New\rYork\b");
+    }
+
+    [Fact]
+    public void WhenJsonArrayContainsMixedEscaping()
+    {
+        var raw = """
+                  {
+                      "tags": ["escaped\"quote", "back\\slash", "\u00e9\u00f8", "tab\there", "new\nline"]
+                  }
+                  """;
+
+        var ok = SchemaTherapist.TryMapToSchema<TagResult>(raw, out var result);
+
+        ok.Should().BeTrue();
+        result.Should().NotBeNull();
+        result!.Tags.Should().BeEquivalentTo(new[] 
+        { 
+            "escaped\"quote", 
+            "back\\slash", 
+            "éø", 
+            "tab\there", 
+            "new\nline" 
+        });
+    }
+    
+    [Fact]
+    public void WhenJsonContainsEmbeddedJsonString()
+    {
+        var raw = """
+                  {
+                      "name": "{\"firstName\": \"John\", \"lastName\": \"Doe\"}",
+                      "age": "30",
+                      "city": "New York",
+                      "tags": "[\"developer\", {\"level\": \"senior\", \"years\": 10}]"
+                  }
+                  """;
+
+        var ok = SchemaTherapist.TryMapToSchema<PersonWithNestedJson>(raw, out var result);
+
+        ok.Should().BeTrue();
+        result.Should().NotBeNull();
+        result!.Name.Should().Be("{\"firstName\": \"John\", \"lastName\": \"Doe\"}");
+        result.Age.Should().Be(30);
+        result.City.Should().Be("New York");
+        result.Tags.Should().Be("[\"developer\", {\"level\": \"senior\", \"years\": 10}]");
+    }
+
+    private class PersonWithNestedJson
+    {
+        public required string Name { get; set; }
+        public required int Age { get; set; }
+        public required string City { get; set; }
+        public required string Tags { get; set; }
+    }
+    
     class Person
     {
         public required string Name { get; set; }

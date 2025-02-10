@@ -114,7 +114,7 @@ public static class FunctionExtensions
 
                     if (methodInfo != null)
                     {
-                        var parameters = new object?[] { json, null, null, function.Metadata.JsonSerializerOptions };
+                        var parameters = new object?[] { json, null, function.Metadata.JsonSerializerOptions };
                         var success = (bool)methodInfo.Invoke(null, parameters)!;
 
                         if (success)
