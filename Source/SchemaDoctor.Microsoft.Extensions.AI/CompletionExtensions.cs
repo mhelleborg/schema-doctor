@@ -11,16 +11,13 @@ public static class CompletionExtensions
     /// </summary>
     /// <param name="completion">The completion to get the result from</param>
     /// <param name="parsed">The parsed result</param>
-    /// <param name="error">The error if the result cannot be parsed</param>
     /// <returns>True if the result can be parsed, false otherwise</returns>
     public static bool TryToGetResultWithTherapy<T>(this ChatCompletion<T> completion,
-        [NotNullWhen(true)] out T? parsed,
-        [NotNullWhen(false)] out string? error) where T : class
+        [NotNullWhen(true)] out T? parsed) where T : class
     {
         // If the default is OK, do nothing extra
         if (completion.TryGetResult(out parsed))
         {
-            error = null;
             return true;
         }
 
@@ -29,10 +26,9 @@ public static class CompletionExtensions
         if (raw is null)
         {
             parsed = default;
-            error = "No text in response";
             return false;
         }
 
-        return SchemaTherapist.TryMapToSchema(raw, out parsed, out error);
+        return SchemaTherapist.TryMapToSchema(raw, out parsed);
     }
 }

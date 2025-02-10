@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text.RegularExpressions;
 using NJsonSchema;
 
 namespace SchemaDoctor;
@@ -24,15 +25,12 @@ public static class SchemaTherapist
     /// </summary>
     /// <param name="raw"></param>
     /// <param name="parsed"></param>
-    /// <param name="error"></param>
     /// <param name="serializerOptions"></param>
     /// <typeparam name="T"></typeparam>
     /// <returns></returns>
     public static bool TryMapToSchema<T>(string raw, [NotNullWhen(true)] out T? parsed,
-        [NotNullWhen(false)] out string? error, JsonSerializerOptions? serializerOptions = null)
+        [NotNullWhen(false)] JsonSerializerOptions? serializerOptions = null)
     {
-        error = null;
-
         try
         {
             if (JsonSerializer.Deserialize<T>(raw, serializerOptions ?? CaseInsensitive) is { } result)
@@ -46,41 +44,58 @@ public static class SchemaTherapist
             // Broken, but we can try to fix it
         }
 
-        try
+        var candidates = GetCandidates(raw);
+
+        // Checking the last candidate first, if the LLM is doing chain of thought
+        foreach (var candidate in Enumerable.Reverse(candidates))
         {
-            var schema = SchemaDefinition<T>.JsonSchema;
-
-            var jsonNode = JsonNode.Parse(raw);
-            if (jsonNode is null)
+            try
             {
-                parsed = default;
-                error = "Not a valid JSON document";
-                return false;
-            }
+                var jsonNode = JsonNode.Parse(candidate);
+                if (jsonNode is null)
+                {
+                    continue;
+                }
 
-            var fixedJson = FixNode(jsonNode, schema);
-            if (fixedJson is null)
+                var fixedJson = FixNode(jsonNode, SchemaDefinition<T>.JsonSchema);
+
+                parsed = JsonSerializer.Deserialize<T>(fixedJson.ToJsonString(), serializerOptions ?? CaseInsensitive);
+                return parsed is not null;
+            }
+            catch
             {
-                parsed = default;
-                error = "Failed to fix JSON";
-                return false;
+                // Continue or return false if no more candidates
             }
+        }
 
-            parsed = JsonSerializer.Deserialize<T>(fixedJson.ToJsonString(), serializerOptions ?? CaseInsensitive);
-            return parsed is not null;
-        }
-        catch (Exception e)
-        {
-            parsed = default;
-            error = e.Message;
-            return false;
-        }
+        parsed = default;
+        return false;
     }
 
-    private static JsonNode? FixNode(JsonNode? node, JsonSchema schema)
+    private static List<string> GetCandidates(string raw)
     {
-        if (node is null) return node;
+        var found = new List<string>
+        {
+            raw
+        };
+        var remaining = raw.AsSpan();
+        while (remaining.Length > 0)
+        {
+            var json = JsonExtractor.ExtractJsonDocument(remaining, out remaining);
 
+            if (json.Length > 0)
+            {
+                found.Add(json.ToString());
+                if (remaining.Length == 0) break;
+            }
+            else break;
+        }
+
+        return found;
+    }
+
+    private static JsonNode FixNode(JsonNode node, JsonSchema schema)
+    {
         var type = schema.Type;
 
         if (type.HasFlag(JsonObjectType.Object))
@@ -201,6 +216,8 @@ public static class SchemaTherapist
         var fixedArray = new JsonArray();
         foreach (var item in jsonArray)
         {
+            if(item is null) continue;
+            
             fixedArray.Add(FixNode(item, itemSchema));
         }
 
@@ -282,7 +299,7 @@ public static class SchemaTherapist
 
                 if (value is JsonObject property)
                 {
-                    if (property.TryGetPropertyValue("content", out var contentNode))
+                    if (property.TryGetPropertyValue("content", out var contentNode) && contentNode is not null)
                     {
                         fixedObject.Add(key, FixNode(contentNode, propertySchema));
                     }
