@@ -85,7 +85,9 @@ public static class SchemaTherapist
 
             if (json.Length > 0)
             {
-                found.Add(json.ToString());
+                var item = json.ToString();
+                if(item.Equals(raw)) continue;
+                found.Add(item);
                 if (remaining.Length == 0) break;
             }
             else break;
