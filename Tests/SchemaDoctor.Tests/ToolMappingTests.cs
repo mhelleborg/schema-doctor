@@ -17,7 +17,7 @@ public class ToolMappingTests
     [InlineData("0", false)]
     public void CanMapStringToBool(string asString, bool expected)
     {
-        AIFunction function = AIFunctionFactoryWithTherapy.CreateFunction(DoABooleanThing);
+        var function = AIFunctionFactoryWithTherapy.CreateFunction(DoABooleanThing);
 
         var arguments = new Dictionary<string, object?>()
         {
@@ -37,7 +37,7 @@ public class ToolMappingTests
     [InlineData("-2", -2)]
     public void CanMapIntFromString(object asValue, int expected)
     {
-        AIFunction function = AIFunctionFactoryWithTherapy.CreateFunction(DoAThing);
+        var function = AIFunctionFactoryWithTherapy.CreateFunction(DoAThing);
 
         var arguments = new Dictionary<string, object?>
         {
@@ -56,7 +56,7 @@ public class ToolMappingTests
     [InlineData(1234, "1234")]
     public void CanMapStringFromInt(object asValue, string expected)
     {
-        AIFunction function = AIFunctionFactoryWithTherapy.CreateFunction(DoAStringThing);
+        var function = AIFunctionFactoryWithTherapy.CreateFunction(DoAStringThing);
 
         var arguments = new Dictionary<string, object?>()
         {

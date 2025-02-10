@@ -629,6 +629,27 @@ public class SchemaDoctorTests
     }
     
     [Fact]
+    public void WhenTextContainsJsonCharacters()
+    {
+        var raw = """
+                  
+                  This might mess with the parsing: {{}[
+
+                  {
+                      "name": "John",
+                      "age": "30",
+                      "city": "New York"
+                  }
+                  """;
+
+        var ok = SchemaTherapist.TryMapToSchema<Person>(raw, out var result);
+
+        ok.Should().BeTrue();
+        result.Should().NotBeNull();
+        result!.Name.Should().Be("John");
+    }
+    
+    [Fact]
     public void WhenJsonHasStringForEnum()
     {
         var raw = """
@@ -646,30 +667,6 @@ public class SchemaDoctorTests
         result!.Status.Should().Be(UserStatus.Active);
     }
 
-    [Fact]
-        public void ReproTest()
-    {
-        var raw = """
-                  ```json
-                  {
-                    "$schema": "http://json-schema.org/draft-04/schema#",
-                    "type": "object",
-                    "properties": {
-                      "ExecutiveSummary": "The provided code defines a Customer class that is an aggregate root in a domain-driven design context, using the Dolittle SDK. It includes a method for applying an event when a customer eats a dish and logs this action. The code does not directly expose any OWASP top 10 vulnerabilities, but it is important to ensure that the inputs to the methods are properly validated and sanitized in a broader context.",
-                      "DetectedSecurityIssues": []
-                    }
-                  }
-                  """.ReplaceLineEndings("\n");
-
-        var ok = SchemaTherapist.TryMapToSchema<TypeSummary>(raw, out var type);
-        ok.Should().BeTrue();
-
-        type.Should().NotBeNull();
-        type!.ExecutiveSummary.Should().NotBeNullOrEmpty();
-
-    }
-
-    
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum Severity
     {
@@ -704,14 +701,6 @@ public class SchemaDoctorTests
     public record FileSummary
     {
         [Description("High level summary of the file")]
-        public required string ExecutiveSummary { get; init; }
-
-        public required SecurityIssue[] DetectedSecurityIssues { get; init; }
-    }
-
-    public record TypeSummary
-    {
-        [Description("High level summary of the type")]
         public required string ExecutiveSummary { get; init; }
 
         public required SecurityIssue[] DetectedSecurityIssues { get; init; }

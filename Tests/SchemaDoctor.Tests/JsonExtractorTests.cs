@@ -86,4 +86,32 @@ public class JsonExtractorTests
                                          """.ReplaceLineEndings("\n"));
     }
     
+    [Fact]
+    public void WhenTextContainsJsonCharacters()
+    {
+        var raw = """
+
+                  This might mess with the parsing: {{7[{
+
+                  {
+                      "name": "John",
+                      "age": "30",
+                      "city": "New York"
+                  }
+                  """.ReplaceLineEndings("\n");
+
+        var next = JsonExtractor.ExtractJsonDocument(raw, out _);
+        next.Length.Should().NotBe(0);
+
+        var asString = next.ToString();
+        
+        asString.Should().BeEquivalentTo("""
+                                         {
+                                             "name": "John",
+                                             "age": "30",
+                                             "city": "New York"
+                                         }
+                                         """.ReplaceLineEndings("\n"));
+    }
+    
 }
