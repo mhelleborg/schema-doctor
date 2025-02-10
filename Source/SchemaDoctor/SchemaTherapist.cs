@@ -309,6 +309,10 @@ public static class SchemaTherapist
                 {
                     fixedObject.Add(key, FixNode(valueNode, propertySchema));
                 }
+                else if (value is JsonArray array)
+                {
+                    fixedObject.Add(key, FixNode(array, propertySchema));
+                }
             }
         }
 
