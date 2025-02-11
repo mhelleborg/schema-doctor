@@ -1,15 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-      <VersionSuffix>preview</VersionSuffix>
+        <VersionSuffix>preview</VersionSuffix>
+        <NoWarn>NU5104</NoWarn>
     </PropertyGroup>
-    
+
     <ItemGroup>
-      <ProjectReference Include="..\SchemaDoctor\SchemaDoctor.csproj" />
+        <ProjectReference Include="..\SchemaDoctor\SchemaDoctor.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Microsoft.Extensions.AI" />
+        <PackageReference Include="Microsoft.Extensions.AI" Version="9.1.0-preview.1.25064.3"/>
     </ItemGroup>
 
 </Project>
