@@ -3,6 +3,9 @@ using Microsoft.Extensions.AI;
 
 namespace SchemaDoctor.Microsoft.Extensions.AI;
 
+/// <summary>
+/// ChatCompletion extensions for handling malformed input
+/// </summary>
 public static class CompletionExtensions
 {
     /// <summary>

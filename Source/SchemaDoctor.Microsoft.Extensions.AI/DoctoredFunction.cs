@@ -8,6 +8,7 @@ namespace SchemaDoctor.Microsoft.Extensions.AI;
 /// <param name="function"></param>
 public class DoctoredFunction(AIFunction function) : AIFunction
 {
+    /// <inheritdoc />
     protected override Task<object?> InvokeCoreAsync(IEnumerable<KeyValuePair<string, object?>> arguments,
         CancellationToken cancellationToken)
     {
@@ -15,5 +16,6 @@ public class DoctoredFunction(AIFunction function) : AIFunction
     }
 
 
+    /// <inheritdoc />
     public override AIFunctionMetadata Metadata { get; } = function.Metadata.WithoutCancellationTokenParameters();
 }

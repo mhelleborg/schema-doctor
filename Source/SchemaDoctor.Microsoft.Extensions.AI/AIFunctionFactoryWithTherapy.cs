@@ -3,6 +3,9 @@ using Microsoft.Extensions.AI;
 
 namespace SchemaDoctor.Microsoft.Extensions.AI;
 
+/// <summary>
+/// Factory that wraps a created AIFunction in middleware that tries to map the arguments to the defined schema.
+/// </summary>
 public static class AIFunctionFactoryWithTherapy
 {
     /// <summary>

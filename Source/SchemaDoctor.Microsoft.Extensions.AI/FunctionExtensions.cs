@@ -4,6 +4,9 @@ using Microsoft.Extensions.AI;
 
 namespace SchemaDoctor.Microsoft.Extensions.AI;
 
+/// <summary>
+/// Extensions for <see cref="AIFunction"/> to help mitigate hallucinations
+/// </summary>
 public static class FunctionExtensions
 {
     /// <summary>
@@ -69,6 +72,13 @@ public static class FunctionExtensions
         return metadata;
     }
 
+    /// <summary>
+    /// Tries to parse the arguments to the correct types based on the schema
+    /// </summary>
+    /// <param name="function">The applicable function</param>
+    /// <param name="arguments">The arguments to parse</param>
+    /// <param name="parsed">True if it was able to parse the arguments</param>
+    /// <returns></returns>
     public static bool TryGetArguments(this AIFunction function, IEnumerable<KeyValuePair<string, object?>>? arguments,
         [NotNullWhen(true)] out List<KeyValuePair<string, object?>>? parsed)
     {
