@@ -2,7 +2,6 @@
 
     <ItemGroup>
         <PackageReference Include="NJsonSchema" Version="11.1.0"/>
-        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0"/>
     </ItemGroup>
 
 </Project>
