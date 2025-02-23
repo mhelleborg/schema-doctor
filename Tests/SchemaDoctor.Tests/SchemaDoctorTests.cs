@@ -699,7 +699,7 @@ public class SchemaDoctorTests
         result.Age.Should().Be(25);
         result.City.Should().Be("Boston");
     }
-    
+
     [Fact]
     public void WhenJsonHasMultipleNestedJsonBlocksAndTheLastOneIsInvalid()
     {

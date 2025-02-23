@@ -85,7 +85,7 @@ public static class SchemaTherapist
             if (json.Length > 0)
             {
                 var item = json.ToString();
-                if(item.Equals(raw)) continue;
+                if (item.Equals(raw)) continue;
                 found.Add(item);
                 if (remaining.Length == 0) break;
             }
@@ -217,8 +217,8 @@ public static class SchemaTherapist
         var fixedArray = new JsonArray();
         foreach (var item in jsonArray)
         {
-            if(item is null) continue;
-            
+            if (item is null) continue;
+
             fixedArray.Add(FixNode(item, itemSchema));
         }
 

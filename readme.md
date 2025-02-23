@@ -23,7 +23,7 @@ dotnet add package SchemaDoctor.Microsoft.Extensions.AI
 - Maps string representations to proper numeric/boolean values
 - Handles arrays that are incorrectly returned as strings
 - Supports case-insensitive property mapping
-- Integrates with Microsoft.Extensions.AI, both for `AIFunction` and structured responses via `ChatCompletion<T>`.
+- Integrates with Microsoft.Extensions.AI, both for `AIFunction` and structured responses via `ChatResponse<T>`.
 
 ## Basic Usage
 

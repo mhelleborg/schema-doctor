@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.AI;
+﻿using System.Reflection;
+using System.Text.Json;
+using Microsoft.Extensions.AI;
 
 namespace SchemaDoctor.Microsoft.Extensions.AI;
 
@@ -15,7 +17,21 @@ public class DoctoredFunction(AIFunction function) : AIFunction
         return function.InvokeWithTherapyAsync(arguments, cancellationToken);
     }
 
+    /// <inheritdoc />
+    public override JsonElement JsonSchema { get; } = function.GetSchema();
 
     /// <inheritdoc />
-    public override AIFunctionMetadata Metadata { get; } = function.Metadata.WithoutCancellationTokenParameters();
+    public override MethodInfo? UnderlyingMethod => function.UnderlyingMethod;
+
+    /// <inheritdoc />
+    public override JsonSerializerOptions JsonSerializerOptions => function.JsonSerializerOptions;
+
+    /// <inheritdoc />
+    public override string Name => function.Name;
+
+    /// <inheritdoc />
+    public override string Description => function.Description;
+
+    /// <inheritdoc />
+    public override IReadOnlyDictionary<string, object?> AdditionalProperties => function.AdditionalProperties;
 }

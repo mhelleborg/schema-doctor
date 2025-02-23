@@ -4,7 +4,7 @@ using Microsoft.Extensions.AI;
 namespace SchemaDoctor.Microsoft.Extensions.AI;
 
 /// <summary>
-/// ChatCompletion extensions for handling malformed input
+/// ChatResponse extensions for handling malformed input
 /// </summary>
 public static class CompletionExtensions
 {
@@ -15,7 +15,7 @@ public static class CompletionExtensions
     /// <param name="completion">The completion to get the result from</param>
     /// <param name="parsed">The parsed result</param>
     /// <returns>True if the result can be parsed, false otherwise</returns>
-    public static bool TryToGetResultWithTherapy<T>(this ChatCompletion<T> completion,
+    public static bool TryToGetResultWithTherapy<T>(this ChatResponse<T> completion,
         [NotNullWhen(true)] out T? parsed) where T : class
     {
         // If the default is OK, do nothing extra

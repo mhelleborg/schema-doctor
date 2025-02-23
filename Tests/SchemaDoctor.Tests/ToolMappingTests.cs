@@ -1,5 +1,4 @@
 ﻿using FluentAssertions;
-using Microsoft.Extensions.AI;
 using SchemaDoctor.Microsoft.Extensions.AI;
 
 namespace SchemaDoctor.Tests;

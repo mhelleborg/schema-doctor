@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using Microsoft.Extensions.AI;
 
 namespace SchemaDoctor.Microsoft.Extensions.AI;
@@ -9,6 +10,18 @@ namespace SchemaDoctor.Microsoft.Extensions.AI;
 /// </summary>
 public static class FunctionExtensions
 {
+    private static bool? _schemasIncludeCts = null;
+
+    static string Cancel(CancellationToken cancellationToken)
+    {
+        return "unused";
+    }
+
+    private static JsonElement SchemaWithCancellationToken { get; } = AIFunctionFactory.Create(Cancel).JsonSchema;
+
+    private static bool SchemasIncludeCts =>
+        _schemasIncludeCts ??= SchemaWithCancellationToken.ToString().Contains("cancellationToken");
+
     /// <summary>
     /// Wraps the function in a <see cref="DoctoredFunction"/>
     /// This will then try to fix schema issues both for the defined input schema,
@@ -54,22 +67,58 @@ public static class FunctionExtensions
         return dict;
     }
 
-    internal static AIFunctionMetadata WithoutCancellationTokenParameters(this AIFunctionMetadata metadata)
+    internal static JsonElement GetSchema(this AIFunction function)
     {
-        var cancellationTokenParameters = metadata.Parameters.Where(it => it.IsCancellationToken()).ToList();
-        if (cancellationTokenParameters.Count != 0)
+        if (!SchemasIncludeCts)
         {
-            return new AIFunctionMetadata(metadata.Name)
-            {
-                Description = metadata.Description,
-                Parameters = metadata.Parameters.Except(cancellationTokenParameters).ToList(),
-                ReturnParameter = metadata.ReturnParameter,
-                JsonSerializerOptions = metadata.JsonSerializerOptions,
-                AdditionalProperties = metadata.AdditionalProperties
-            };
+            return function.JsonSchema;
         }
 
-        return metadata;
+        var toRemove = function.UnderlyingMethod?.GetParameters()
+            .Where(it => it.ParameterType == typeof(CancellationToken))
+            .Select(it => it.Name)
+            .OfType<string>().ToHashSet();
+
+        if (toRemove is null)
+        {
+            return function.JsonSchema;
+        }
+
+        var updatedSchema = function.JsonSchema.Without(toRemove);
+        return updatedSchema;
+    }
+
+    /// <summary>
+    /// Remove the specified properties from the schema and return the updated schema
+    /// </summary>
+    /// <param name="jsonSchema"></param>
+    /// <param name="fields"></param>
+    /// <returns></returns>
+    private static JsonElement Without(this JsonElement jsonSchema, HashSet<string> fields)
+    {
+        // If the element isn't an object, return it as is
+        if (jsonSchema.ValueKind != JsonValueKind.Object)
+        {
+            return jsonSchema;
+        }
+
+        var node = JsonNode.Parse(jsonSchema.ToString());
+        if (node is null)
+        {
+            return jsonSchema;
+        }
+
+        // Get the properties object
+        if (node is JsonObject obj && obj.TryGetPropertyValue("properties", out var propsNode) &&
+            propsNode is JsonObject propsObj)
+        {
+            foreach (var name in fields)
+            {
+                propsObj.Remove(name);
+            }
+        }
+
+        return JsonDocument.Parse(node.ToJsonString()).RootElement;
     }
 
     /// <summary>
@@ -96,44 +145,58 @@ public static class FunctionExtensions
         parsed = [];
         var ok = true;
 
-        foreach (var parameterMetadata in function.Metadata.Parameters)
+
+        var parameters = function.UnderlyingMethod?.GetParameters();
+
+        if (parameters is null)
         {
-            if (dict?.TryGetValue(parameterMetadata.Name, out var value) == true)
+            return false;
+        }
+
+
+        foreach (var parameter in parameters)
+        {
+            if (parameter.Name is null)
             {
-                if (parameterMetadata.ParameterType is null || value?.GetType() == parameterMetadata.ParameterType)
+                continue;
+            }
+
+            if (dict?.TryGetValue(parameter.Name, out var value) == true)
+            {
+                if (value?.GetType() == parameter.ParameterType)
                 {
-                    parsed.Add(new KeyValuePair<string, object?>(parameterMetadata.Name, value));
+                    parsed.Add(new KeyValuePair<string, object?>(parameter.Name, value));
                     continue;
                 }
 
                 if (value is null)
                 {
-                    parsed.Add(new KeyValuePair<string, object?>(parameterMetadata.Name, null));
+                    parsed.Add(new KeyValuePair<string, object?>(parameter.Name, null));
                     continue;
                 }
 
                 // Try to fix incorrect type using schema mapping
                 try
                 {
-                    var json = JsonSerializer.Serialize(value, function.Metadata.JsonSerializerOptions);
+                    var json = JsonSerializer.Serialize(value, function.JsonSerializerOptions);
 
                     // Use reflection to call TryMapToSchema with the correct type
                     var methodInfo = typeof(SchemaTherapist)
                         .GetMethod(nameof(SchemaTherapist.TryMapToSchema))
-                        ?.MakeGenericMethod(parameterMetadata.ParameterType);
+                        ?.MakeGenericMethod(parameter.ParameterType);
 
                     if (methodInfo != null)
                     {
-                        var parameters = new object?[] { json, null, function.Metadata.JsonSerializerOptions };
-                        var success = (bool)methodInfo.Invoke(null, parameters)!;
+                        var therapistParams = new object?[] { json, null, function.JsonSerializerOptions };
+                        var success = (bool)methodInfo.Invoke(null, therapistParams)!;
 
                         if (success)
                         {
-                            parsed.Add(new KeyValuePair<string, object?>(parameterMetadata.Name, parameters[1]));
+                            parsed.Add(new KeyValuePair<string, object?>(parameter.Name, therapistParams[1]));
                         }
                     }
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     Console.WriteLine(e);
                     ok = false;
@@ -146,8 +209,8 @@ public static class FunctionExtensions
     }
 
 
-    static bool IsCancellationToken(this AIFunctionParameterMetadata parameter)
-    {
-        return parameter.ParameterType == typeof(CancellationToken);
-    }
+    // static bool IsCancellationToken(this AIFunctionParameterMetadata parameter)
+    // {
+    //     return parameter.ParameterType == typeof(CancellationToken);
+    // }
 }

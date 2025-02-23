@@ -1,36 +1,36 @@
 <Project>
-  <PropertyGroup>
-    <Authors>Magne Helleborg</Authors>
-    <Description>.NET helper library to fix schema issues when working with LLM's</Description>
-    <Copyright>Copyright © 2025 Magne Helleborg</Copyright>
-    <PackageProjectUrl>https://github.com/mhelleborg/schema-doctor</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/magnehell/schema-doctor</RepositoryUrl>
-    <PackageTags>ai;llm;schema;json</PackageTags>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageIcon>logo.png</PackageIcon>
-    <PackageReadmeFile>readme.md</PackageReadmeFile>
+    <PropertyGroup>
+        <Authors>Magne Helleborg</Authors>
+        <Description>.NET helper library to fix schema issues when working with LLM's</Description>
+        <Copyright>Copyright © 2025 Magne Helleborg</Copyright>
+        <PackageProjectUrl>https://github.com/mhelleborg/schema-doctor</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/magnehell/schema-doctor</RepositoryUrl>
+        <PackageTags>ai;llm;schema;json</PackageTags>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageIcon>logo.png</PackageIcon>
+        <PackageReadmeFile>readme.md</PackageReadmeFile>
 
-    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
-    <LangVersion>latest</LangVersion>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <NoWarn>$(NoWarn);CS1591</NoWarn> <!-- Suppress XML comment warnings -->
-  </PropertyGroup>
+        <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+        <LangVersion>latest</LangVersion>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 
-  <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)\..\logo.png" Pack="true" PackagePath="\" />
-    <None Include="$(MSBuildThisFileDirectory)\..\readme.md" Pack="true" PackagePath="\" />
-  </ItemGroup>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" Version="8.0.0" />
-  </ItemGroup>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <NoWarn>$(NoWarn);CS1591</NoWarn> <!-- Suppress XML comment warnings -->
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="$(MSBuildThisFileDirectory)\..\logo.png" Pack="true" PackagePath="\" />
+        <None Include="$(MSBuildThisFileDirectory)\..\readme.md" Pack="true" PackagePath="\" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" Version="8.0.0" />
+    </ItemGroup>
 </Project>

@@ -27,12 +27,12 @@ public class JsonExtractorTests
 
         first.Length.Should().Be(2);
         first.ToString().Should().Be("{}");
-        
+
         var next = JsonExtractor.ExtractJsonDocument(remaining, out remaining);
         next.Length.Should().NotBe(0);
 
         var asString = next.ToString();
-        
+
         asString.Should().BeEquivalentTo("""
                                          {
                                              "name": "John",
@@ -42,7 +42,7 @@ public class JsonExtractorTests
                                          }
                                          """.ReplaceLineEndings("\n"));
     }
-    
+
     [Fact]
     public void WhenJsonIsArrayWrappedInTextResponseAndMarkdown()
     {
@@ -68,12 +68,12 @@ public class JsonExtractorTests
 
         first.Length.Should().Be(2);
         first.ToString().Should().Be("{}");
-        
+
         var next = JsonExtractor.ExtractJsonDocument(remaining, out remaining);
         next.Length.Should().NotBe(0);
 
         var asString = next.ToString();
-        
+
         asString.Should().BeEquivalentTo("""
                                          [
                                            {
@@ -85,7 +85,7 @@ public class JsonExtractorTests
                                          ]
                                          """.ReplaceLineEndings("\n"));
     }
-    
+
     [Fact]
     public void WhenTextContainsJsonCharacters()
     {
@@ -104,7 +104,7 @@ public class JsonExtractorTests
         next.Length.Should().NotBe(0);
 
         var asString = next.ToString();
-        
+
         asString.Should().BeEquivalentTo("""
                                          {
                                              "name": "John",
@@ -113,5 +113,4 @@ public class JsonExtractorTests
                                          }
                                          """.ReplaceLineEndings("\n"));
     }
-    
 }
