@@ -10,7 +10,7 @@ namespace SchemaDoctor.Microsoft.Extensions.AI;
 /// </summary>
 public static class FunctionExtensions
 {
-    private static bool? _schemasIncludeCts = null;
+    private static bool? _schemasIncludeCts;
 
     static string Cancel(CancellationToken cancellationToken)
     {
@@ -207,10 +207,4 @@ public static class FunctionExtensions
 
         return ok;
     }
-
-
-    // static bool IsCancellationToken(this AIFunctionParameterMetadata parameter)
-    // {
-    //     return parameter.ParameterType == typeof(CancellationToken);
-    // }
 }
