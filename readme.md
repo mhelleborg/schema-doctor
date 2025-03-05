@@ -4,7 +4,7 @@
 
 A .NET helper library to fix schema issues when working with Large Language Models (LLMs). It helps handle common hallucination problems by attempting to map potentially incorrect responses to your expected schema.
 
-In is also able to pick out json responses returned after chain of thought or reasoning tokens, as long as it matches a given json schema.
+It is also able to pick out json responses returned after chain of thought or reasoning tokens, as long as it matches a given json schema.
 
 ## Installation
 
