@@ -25,8 +25,8 @@ public static class CompletionExtensions
         }
 
         // Might be a hallucination
-        var raw = completion.Message.Text;
-        if (raw is null)
+        var raw = completion.Text;
+        if (string.IsNullOrWhiteSpace(raw))
         {
             parsed = default;
             return false;
