@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <ItemGroup>
-        <PackageReference Include="NJsonSchema" Version="11.1.0" />
+        <PackageReference Include="NJsonSchema" Version="11.3.2" />
     </ItemGroup>
 
 </Project>

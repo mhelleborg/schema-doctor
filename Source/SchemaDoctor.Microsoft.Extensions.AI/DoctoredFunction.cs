@@ -11,11 +11,11 @@ namespace SchemaDoctor.Microsoft.Extensions.AI;
 public class DoctoredFunction(AIFunction function) : AIFunction
 {
     /// <inheritdoc />
-    protected override Task<object?> InvokeCoreAsync(IEnumerable<KeyValuePair<string, object?>> arguments,
-        CancellationToken cancellationToken)
+    protected override async ValueTask<object?> InvokeCoreAsync(AIFunctionArguments arguments, CancellationToken cancellationToken)
     {
-        return function.InvokeWithTherapyAsync(arguments, cancellationToken);
+        return await function.InvokeWithTherapyAsync(arguments, cancellationToken).ConfigureAwait(false);
     }
+
 
     /// <inheritdoc />
     public override JsonElement JsonSchema { get; } = function.GetSchema();
