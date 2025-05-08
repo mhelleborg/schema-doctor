@@ -40,31 +40,27 @@ public static class FunctionExtensions
     /// <param name="arguments"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public static Task<object?> InvokeWithTherapyAsync(
+    public static ValueTask<object?> InvokeWithTherapyAsync(
         this AIFunction function,
-        IEnumerable<KeyValuePair<string, object?>>? arguments,
+        AIFunctionArguments? arguments,
         CancellationToken cancellationToken = default) =>
         function.InvokeAsync(GetArguments(function, arguments), cancellationToken);
 
-    private static IEnumerable<KeyValuePair<string, object?>>? GetArguments(AIFunction function,
-        IEnumerable<KeyValuePair<string, object?>>? arguments)
+    private static AIFunctionArguments? GetArguments(AIFunction function,
+        AIFunctionArguments? arguments)
     {
-        if (arguments is null)
+        if (arguments is null || arguments.Count == 0) // Nothing to do
         {
-            return null;
+            return arguments;
         }
 
-        if (arguments is not IDictionary<string, object?> dict)
-        {
-            dict = arguments.ToDictionary();
-        }
-
-        if (function.TryGetArguments(dict, out var parsedArguments))
+        if (function.TryGetArguments(arguments, out var parsedArguments))
         {
             return parsedArguments;
         }
 
-        return dict;
+        // If parsing fails, return the original arguments
+        return arguments;
     }
 
     internal static JsonElement GetSchema(this AIFunction function)
@@ -79,7 +75,7 @@ public static class FunctionExtensions
             .Select(it => it.Name)
             .OfType<string>().ToHashSet();
 
-        if (toRemove is null)
+        if (toRemove is null || toRemove.Count == 0)
         {
             return function.JsonSchema;
         }
@@ -128,21 +124,17 @@ public static class FunctionExtensions
     /// <param name="arguments">The arguments to parse</param>
     /// <param name="parsed">True if it was able to parse the arguments</param>
     /// <returns></returns>
-    public static bool TryGetArguments(this AIFunction function, IEnumerable<KeyValuePair<string, object?>>? arguments,
-        [NotNullWhen(true)] out List<KeyValuePair<string, object?>>? parsed)
+    public static bool TryGetArguments(this AIFunction function, AIFunctionArguments arguments,
+        [NotNullWhen(true)] out AIFunctionArguments? parsed)
     {
-        if (arguments is null)
+        parsed = null;
+        if (arguments.Count == 0) // Nothing to do
         {
-            parsed = null;
-            return false;
+            parsed = arguments;
+            return true;
         }
 
-        if (arguments is not IDictionary<string, object?> dict)
-        {
-            dict = arguments.ToDictionary();
-        }
-
-        parsed = [];
+        var parsedArguments = new Dictionary<string, object?>();
         var ok = true;
 
 
@@ -153,7 +145,6 @@ public static class FunctionExtensions
             return false;
         }
 
-
         foreach (var parameter in parameters)
         {
             if (parameter.Name is null)
@@ -161,17 +152,17 @@ public static class FunctionExtensions
                 continue;
             }
 
-            if (dict?.TryGetValue(parameter.Name, out var value) == true)
+            if (arguments.TryGetValue(parameter.Name, out var value))
             {
                 if (value?.GetType() == parameter.ParameterType)
                 {
-                    parsed.Add(new KeyValuePair<string, object?>(parameter.Name, value));
+                    parsedArguments.Add(parameter.Name, value);
                     continue;
                 }
 
                 if (value is null)
                 {
-                    parsed.Add(new KeyValuePair<string, object?>(parameter.Name, null));
+                    parsedArguments.Add(parameter.Name, null);
                     continue;
                 }
 
@@ -192,18 +183,40 @@ public static class FunctionExtensions
 
                         if (success)
                         {
-                            parsed.Add(new KeyValuePair<string, object?>(parameter.Name, therapistParams[1]));
+                            parsedArguments.Add(parameter.Name, therapistParams[1]);
                         }
+                        else
+                        {
+                            // If mapping fails, add the original value? Or mark as not ok?
+                            // For now, let's add the original value and mark as not fully ok
+                            parsedArguments.Add(parameter.Name, value);
+                            ok = false;
+                        }
+                    }
+                    else
+                    {
+                         parsedArguments.Add(parameter.Name, value); // Add original if reflection fails
+                         ok = false;
                     }
                 }
                 catch (Exception e)
                 {
                     Console.WriteLine(e);
                     ok = false;
-                    // Failed to map, skip this parameter
+                    // Failed to map, add the original value
+                    parsedArguments.Add(parameter.Name, value);
                 }
             }
+            // Handle parameters not present in the input dictionary?
+            // Currently, they are just skipped. This seems reasonable.
         }
+
+        parsed = new AIFunctionArguments(parsedArguments)
+        {
+            Services = arguments.Services,
+            Context = arguments.Context
+        };
+
 
         return ok;
     }

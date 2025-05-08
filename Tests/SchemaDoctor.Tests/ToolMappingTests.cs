@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using Microsoft.Extensions.AI;
 using SchemaDoctor.Microsoft.Extensions.AI;
 
 namespace SchemaDoctor.Tests;
@@ -23,7 +24,7 @@ public class ToolMappingTests
             { "upperCase", asString }
         };
 
-        var ok = function.TryGetArguments(arguments, out var parsed);
+        var ok = function.TryGetArguments(new AIFunctionArguments(arguments), out var parsed);
 
         ok.Should().BeTrue();
         parsed.Should().HaveCount(1);
@@ -43,7 +44,7 @@ public class ToolMappingTests
             { "howManyTimes", asValue }
         };
 
-        var ok = function.TryGetArguments(arguments,
+        var ok = function.TryGetArguments(new AIFunctionArguments(arguments),
             out var parsed);
 
         ok.Should().BeTrue();
@@ -62,7 +63,7 @@ public class ToolMappingTests
             { "zip", asValue }
         };
 
-        var ok = function.TryGetArguments(arguments,
+        var ok = function.TryGetArguments(new AIFunctionArguments(arguments),
             out var parsed);
 
         ok.Should().BeTrue();
