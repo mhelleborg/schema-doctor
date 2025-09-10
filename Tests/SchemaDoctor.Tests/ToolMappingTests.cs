@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+﻿using AwesomeAssertions;
 using Microsoft.Extensions.AI;
 using SchemaDoctor.Microsoft.Extensions.AI;
 

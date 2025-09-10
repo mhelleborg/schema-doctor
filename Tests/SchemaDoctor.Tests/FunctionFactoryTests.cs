@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel;
-using FluentAssertions;
+using AwesomeAssertions;
 using SchemaDoctor.Microsoft.Extensions.AI;
 
 namespace SchemaDoctor.Tests;
