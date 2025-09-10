@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Text.Json.Serialization;
-using FluentAssertions;
+using AwesomeAssertions;
 
 // ReSharper disable UnusedAutoPropertyAccessor.Local
 // ReSharper disable ClassNeverInstantiated.Local
