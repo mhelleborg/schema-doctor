@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/.meta/">
+    <File Path="Source\Directory.Build.props" />
+    <File Path="readme.md" />
+    <File Path=".gitignore" />
+  </Folder>
+  <Project Path="Source\SchemaDoctor\SchemaDoctor.csproj" />
+  <Project Path="Source\SchemaDoctor.Microsoft.Extensions.AI\SchemaDoctor.Microsoft.Extensions.AI.csproj" />
+  <Project Path="Tests\SchemaDoctor.Tests\SchemaDoctor.Tests.csproj" />
+</Solution>

@@ -31,6 +31,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" Version="8.0.0" />
+        <PackageReference Update="Microsoft.SourceLink.GitHub" PrivateAssets="All" Version="10.0.103" />
     </ItemGroup>
 </Project>
