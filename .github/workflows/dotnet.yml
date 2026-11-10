@@ -7,6 +7,12 @@ on:
     branches: [ main ]
   release:
     types: [ published ]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to build and publish to NuGet (e.g. 0.4.6)'
+        required: true
+        type: string
 
 env:
   SOLUTION_FILE: ""
@@ -18,7 +24,10 @@ jobs:
   build_and_test:
     name: Build, Test and Release
     runs-on: ubuntu-latest
-    
+    permissions:
+      contents: read
+      id-token: write # Required for NuGet trusted publishing (OIDC)
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -42,17 +51,28 @@ jobs:
         run: dotnet test ${{ env.SOLUTION_FILE }} --configuration Release --no-build --verbosity normal
 
       - name: Get version
-        if: github.event_name == 'release'
+        if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
         id: get_version
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          INPUT_VERSION: ${{ inputs.version }}
         run: |
-          TAG=${{ github.event.release.tag_name }}
-          echo "VERSION=${TAG#v}" >> $GITHUB_ENV
+          if [ "$GITHUB_EVENT_NAME" = "release" ]; then
+            VERSION="${RELEASE_TAG#v}"
+          else
+            VERSION="${INPUT_VERSION#v}"
+          fi
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Invalid version '$VERSION', expected MAJOR.MINOR.PATCH"
+            exit 1
+          fi
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Pack
         run: dotnet pack ${{ env.SOLUTION_FILE }} /p:VersionPrefix=${{ env.VERSION || '0.0.1' }} --configuration Release --no-build -o packages
 
       - name: Upload packages
-        if: github.event_name == 'release'
+        if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@v4
         with:
           name: packages
@@ -60,6 +80,13 @@ jobs:
             packages/*.nupkg
           retention-days: 7
 
+      - name: NuGet login (trusted publishing)
+        if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
+        id: nuget_login
+        uses: NuGet/login@v1
+        with:
+          user: ${{ secrets.NUGET_USER }}
+
       - name: Publish
-        if: github.event_name == 'release'
-        run: dotnet nuget push packages/*.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
+        if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
+        run: dotnet nuget push packages/*.nupkg --api-key ${{ steps.nuget_login.outputs.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
